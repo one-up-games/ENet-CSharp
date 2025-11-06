@@ -1,7 +1,7 @@
-/*  
+/*
  *  Managed C# wrapper for an extended version of ENet
  *  This is a fork from upstream and is available at http://github.com/SoftwareGuy/ENet-CSharp
- *  
+ *
  *  Copyright (c) 2019-2023 Matt Coburn (SoftwareGuy/Coburn64), Chris Burns (c6burns)
  *  Copyright (c) 2013 James Bellinger, 2016 Nate Shoffner, 2018 Stanislav Denisov
  *
@@ -464,7 +464,7 @@ namespace ENet
 				throw new ArgumentNullException("destination");
 
 			// Fix by katori, prevents trying to copy a NULL
-			// from native world (ie. disconnect a client)			
+			// from native world (ie. disconnect a client)
 			if (Data == null)
 			{
 				return;
@@ -1140,8 +1140,10 @@ namespace ENet
 
 		public static bool Initialize()
 		{
-			if (Native.enet_linked_version() != version)
-				throw new InvalidOperationException("ENet native library is out of date, please download the latest release from https://github.com/SoftwareGuy/ENet-CSharp/releases");
+			var nativeVersion = Native.enet_linked_version();
+			if (nativeVersion != version)
+				throw new InvalidOperationException(
+					$"ENet native library is out of date: {nativeVersion}, managed version: {version}, please download the latest release from https://github.com/SoftwareGuy/ENet-CSharp/releases");
 
 			return Native.enet_initialize() == 0;
 		}
@@ -1194,7 +1196,7 @@ namespace ENet
         // We're building for a certain mobile fruity OS.
 		private const string nativeLibrary = "__Internal";
 #else
-		// Assume everything else, Windows et al.		
+		// Assume everything else, Windows et al.
 		private const string nativeLibrary = "enet";
 #endif
 #endif
@@ -1403,4 +1405,11 @@ namespace ENet
 		[DllImport(nativeLibrary, CallingConvention = CallingConvention.Cdecl)]
 		internal static extern void enet_peer_reset(IntPtr peer);
 	}
+
+
+#if UNITY_EDITOR
+
+        public static string nativeLibraryName { get { return nativeLibrary; } }
+
+#endif
 }
