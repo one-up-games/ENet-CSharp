@@ -425,7 +425,8 @@ extern "C" {
 		ENET_SOCKOPT_SNDTIMEO = 7,
 		ENET_SOCKOPT_ERROR = 8,
 		ENET_SOCKOPT_NODELAY = 9,
-		ENET_SOCKOPT_IPV6_V6ONLY = 10
+		ENET_SOCKOPT_IPV6_V6ONLY = 10,
+		ENET_SOCKOPT_IP_TOS = 11
 	} ENetSocketOption;
 
 	typedef enum _ENetSocketShutdown {
@@ -2922,10 +2923,10 @@ static int enet_protocol_send_outgoing_commands(ENetHost* host, ENetEvent* event
 			host->commandCount = 0;
 			host->bufferCount = 1;
 			host->packetSize = sizeof(ENetProtocolHeader);
-			
+
 			if (host->checksumCallback != NULL)
 					host->packetSize += sizeof(enet_checksum);
-				
+
 			if (!enet_list_empty(&currentPeer->acknowledgements))
 				enet_protocol_send_acknowledgements(host, currentPeer);
 
@@ -3159,7 +3160,7 @@ int enet_peer_send(ENetPeer* peer, uint8_t channelID, ENetPacket* packet) {
 		ENET_LOG_ERROR("Failed sending data. Peer is not connected, the channel is above the maximum channels supported or the payload length is too large.");
 		return -1;
 	}
-	
+
 	channel = &peer->channels[channelID];
 	fragmentLength = peer->mtu - sizeof(ENetProtocolHeader) - sizeof(ENetProtocolSendFragment) - sizeof(ENetProtocolAcknowledge);
 
@@ -4602,6 +4603,11 @@ int enet_socket_set_option(ENetSocket socket, ENetSocketOption option, int value
 
 		break;
 
+	case ENET_SOCKOPT_IP_TOS:
+		result = setsockopt(socket, IPPROTO_IP, IP_TOS, (char*)&value, sizeof(int));
+
+		break;
+
 	default:
 		break;
 	}
@@ -4937,6 +4943,11 @@ int enet_socket_set_option(ENetSocket socket, ENetSocketOption option, int value
 
 	case ENET_SOCKOPT_IPV6_V6ONLY:
 		result = setsockopt(socket, IPPROTO_IPV6, IPV6_V6ONLY, (char*)&value, sizeof(int));
+
+		break;
+
+	case ENET_SOCKOPT_IP_TOS:
+		result = setsockopt(socket, IPPROTO_IP, IP_TOS, (char*)&value, sizeof(int));
 
 		break;
 
