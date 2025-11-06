@@ -706,6 +706,7 @@ extern "C" {
 	ENET_API void enet_peer_throttle_configure(ENetPeer*, uint32_t, uint32_t, uint32_t, uint32_t);
 
 	ENET_API ENetHost* enet_host_create(const ENetAddress*, size_t, size_t, uint32_t, uint32_t, int);
+	ENET_API void enet_host_socket_set_option(ENetHost*, ENetSocketOption, int);
 	ENET_API void enet_host_destroy(ENetHost*);
 	ENET_API void enet_host_prevent_connections(ENetHost*, uint8_t);
 	ENET_API ENetPeer* enet_host_connect(ENetHost*, const ENetAddress*, size_t, uint32_t);
@@ -4021,6 +4022,17 @@ ENetHost* enet_host_create(const ENetAddress* address, size_t peerCount, size_t 
 
 	ENET_LOG_TRACE("Startup: Complete. Let's do this.");
 	return host;
+}
+
+void enet_host_socket_set_option(ENetHost* host, ENetSocketOption option, int value) {
+
+	if (host == NULL)
+		return;
+
+	if(host->socket == ENET_SOCKET_NULL)
+		return;
+
+	enet_socket_set_option(host->socket, option, value);
 }
 
 void enet_host_destroy(ENetHost* host) {
