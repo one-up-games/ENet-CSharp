@@ -68,6 +68,22 @@ namespace ENet
 		Zombie = 9
 	}
 
+	public enum ENetSocketOption
+	{
+		NONBLOCK = 1,
+		BROADCAST = 2,
+		RCVBUF = 3,
+		SNDBUF = 4,
+		REUSEADDR = 5,
+		RCVTIMEO = 6,
+		SNDTIMEO = 7,
+		ERROR = 8,
+		NODELAY = 9,
+		IPV6_V6ONLY = 10,
+		IP_TOS = 11,
+		IP_TOS_IPV6 = 12,
+	}
+
 	[StructLayout(LayoutKind.Explicit, Size = 18)]
 	internal struct ENetAddress
 	{
@@ -639,6 +655,13 @@ namespace ENet
 
 			if (nativeHost == IntPtr.Zero)
 				throw new InvalidOperationException("Host creation call failed");
+		}
+
+		public void SetSocketOption(ENetSocketOption option, int value)
+		{
+			ThrowIfNotCreated();
+
+			Native.enet_host_socket_set_option(nativeHost, option, value);
 		}
 
 		public void PreventConnections(bool state)
@@ -1323,6 +1346,9 @@ namespace ENet
 
 		[DllImport(nativeLibrary, CallingConvention = CallingConvention.Cdecl)]
 		internal static extern void enet_host_destroy(IntPtr host);
+
+		[DllImport(nativeLibrary, CallingConvention = CallingConvention.Cdecl)]
+		internal static extern void enet_host_socket_set_option(IntPtr host, ENetSocketOption option, int value);
 
 		[DllImport(nativeLibrary, CallingConvention = CallingConvention.Cdecl)]
 		internal static extern void enet_host_prevent_connections(IntPtr host, byte state);
