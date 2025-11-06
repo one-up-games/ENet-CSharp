@@ -1,7 +1,7 @@
-/*  
+/*
  *  Managed C# wrapper for an extended version of ENet
  *  This is a fork from upstream and is available at http://github.com/SoftwareGuy/ENet-CSharp
- *  
+ *
  *  Copyright (c) 2019-2023 Matt Coburn (SoftwareGuy/Coburn64), Chris Burns (c6burns)
  *  Copyright (c) 2013 James Bellinger, 2016 Nate Shoffner, 2018 Stanislav Denisov
  *
@@ -66,6 +66,22 @@ namespace ENet
 		Disconnecting = 7,
 		AcknowledgingDisconnect = 8,
 		Zombie = 9
+	}
+
+	public enum ENetSocketOption
+	{
+		NONBLOCK = 1,
+		BROADCAST = 2,
+		RCVBUF = 3,
+		SNDBUF = 4,
+		REUSEADDR = 5,
+		RCVTIMEO = 6,
+		SNDTIMEO = 7,
+		ERROR = 8,
+		NODELAY = 9,
+		IPV6_V6ONLY = 10,
+		IP_TOS = 11,
+		IP_TOS_IPV6 = 12,
 	}
 
 	[StructLayout(LayoutKind.Explicit, Size = 18)]
@@ -464,7 +480,7 @@ namespace ENet
 				throw new ArgumentNullException("destination");
 
 			// Fix by katori, prevents trying to copy a NULL
-			// from native world (ie. disconnect a client)			
+			// from native world (ie. disconnect a client)
 			if (Data == null)
 			{
 				return;
@@ -639,6 +655,13 @@ namespace ENet
 
 			if (nativeHost == IntPtr.Zero)
 				throw new InvalidOperationException("Host creation call failed");
+		}
+
+		public void SetSocketOption(ENetSocketOption option, int value)
+		{
+			ThrowIfNotCreated();
+
+			Native.enet_host_socket_set_option(nativeHost, option, value);
 		}
 
 		public void PreventConnections(bool state)
@@ -1128,7 +1151,7 @@ namespace ENet
 		public const uint timeoutLimit = 32;
 		public const uint timeoutMinimum = 5000;
 		public const uint timeoutMaximum = 30000;
-		public const uint version = (2 << 16) | (4 << 8) | (9);
+		public const uint version = (2 << 16) | (5 << 8) | (1);
 
 		public static uint Time
 		{
@@ -1140,8 +1163,10 @@ namespace ENet
 
 		public static bool Initialize()
 		{
-			if (Native.enet_linked_version() != version)
-				throw new InvalidOperationException("ENet native library is out of date, please download the latest release from https://github.com/SoftwareGuy/ENet-CSharp/releases");
+			var nativeVersion = Native.enet_linked_version();
+			if (nativeVersion != version)
+				throw new InvalidOperationException(
+					$"ENet native library is out of date: {nativeVersion}, managed version: {version}, please download the latest release from https://github.com/SoftwareGuy/ENet-CSharp/releases");
 
 			return Native.enet_initialize() == 0;
 		}
@@ -1194,7 +1219,7 @@ namespace ENet
         // We're building for a certain mobile fruity OS.
 		private const string nativeLibrary = "__Internal";
 #else
-		// Assume everything else, Windows et al.		
+		// Assume everything else, Windows et al.
 		private const string nativeLibrary = "enet";
 #endif
 #endif
@@ -1323,6 +1348,9 @@ namespace ENet
 		internal static extern void enet_host_destroy(IntPtr host);
 
 		[DllImport(nativeLibrary, CallingConvention = CallingConvention.Cdecl)]
+		internal static extern void enet_host_socket_set_option(IntPtr host, ENetSocketOption option, int value);
+
+		[DllImport(nativeLibrary, CallingConvention = CallingConvention.Cdecl)]
 		internal static extern void enet_host_prevent_connections(IntPtr host, byte state);
 
 		[DllImport(nativeLibrary, CallingConvention = CallingConvention.Cdecl)]
@@ -1403,4 +1431,11 @@ namespace ENet
 		[DllImport(nativeLibrary, CallingConvention = CallingConvention.Cdecl)]
 		internal static extern void enet_peer_reset(IntPtr peer);
 	}
+
+
+#if UNITY_EDITOR
+
+        public static string nativeLibraryName { get { return nativeLibrary; } }
+
+#endif
 }

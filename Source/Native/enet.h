@@ -32,8 +32,8 @@
 #include "custom/enet_logging.h"
 
 #define ENET_VERSION_MAJOR 2
-#define ENET_VERSION_MINOR 4
-#define ENET_VERSION_PATCH 9
+#define ENET_VERSION_MINOR 5
+#define ENET_VERSION_PATCH 1
 #define ENET_VERSION_CREATE(major, minor, patch) (((major) << 16) | ((minor) << 8) | (patch))
 #define ENET_VERSION_GET_MAJOR(version) (((version) >> 16) & 0xFF)
 #define ENET_VERSION_GET_MINOR(version) (((version) >> 8) & 0xFF)
@@ -425,7 +425,9 @@ extern "C" {
 		ENET_SOCKOPT_SNDTIMEO = 7,
 		ENET_SOCKOPT_ERROR = 8,
 		ENET_SOCKOPT_NODELAY = 9,
-		ENET_SOCKOPT_IPV6_V6ONLY = 10
+		ENET_SOCKOPT_IPV6_V6ONLY = 10,
+		ENET_SOCKOPT_IP_TOS = 11,
+		ENET_SOCKOPT_IP_TOS_IPV6 = 12
 	} ENetSocketOption;
 
 	typedef enum _ENetSocketShutdown {
@@ -704,6 +706,7 @@ extern "C" {
 	ENET_API void enet_peer_throttle_configure(ENetPeer*, uint32_t, uint32_t, uint32_t, uint32_t);
 
 	ENET_API ENetHost* enet_host_create(const ENetAddress*, size_t, size_t, uint32_t, uint32_t, int);
+	ENET_API void enet_host_socket_set_option(ENetHost*, ENetSocketOption, int);
 	ENET_API void enet_host_destroy(ENetHost*);
 	ENET_API void enet_host_prevent_connections(ENetHost*, uint8_t);
 	ENET_API ENetPeer* enet_host_connect(ENetHost*, const ENetAddress*, size_t, uint32_t);
@@ -2922,10 +2925,10 @@ static int enet_protocol_send_outgoing_commands(ENetHost* host, ENetEvent* event
 			host->commandCount = 0;
 			host->bufferCount = 1;
 			host->packetSize = sizeof(ENetProtocolHeader);
-			
+
 			if (host->checksumCallback != NULL)
 					host->packetSize += sizeof(enet_checksum);
-				
+
 			if (!enet_list_empty(&currentPeer->acknowledgements))
 				enet_protocol_send_acknowledgements(host, currentPeer);
 
@@ -3159,7 +3162,7 @@ int enet_peer_send(ENetPeer* peer, uint8_t channelID, ENetPacket* packet) {
 		ENET_LOG_ERROR("Failed sending data. Peer is not connected, the channel is above the maximum channels supported or the payload length is too large.");
 		return -1;
 	}
-	
+
 	channel = &peer->channels[channelID];
 	fragmentLength = peer->mtu - sizeof(ENetProtocolHeader) - sizeof(ENetProtocolSendFragment) - sizeof(ENetProtocolAcknowledge);
 
@@ -4021,6 +4024,17 @@ ENetHost* enet_host_create(const ENetAddress* address, size_t peerCount, size_t 
 	return host;
 }
 
+void enet_host_socket_set_option(ENetHost* host, ENetSocketOption option, int value) {
+
+	if (host == NULL)
+		return;
+
+	if(host->socket == ENET_SOCKET_NULL)
+		return;
+
+	enet_socket_set_option(host->socket, option, value);
+}
+
 void enet_host_destroy(ENetHost* host) {
 	ENetPeer* currentPeer;
 
@@ -4602,6 +4616,16 @@ int enet_socket_set_option(ENetSocket socket, ENetSocketOption option, int value
 
 		break;
 
+	case ENET_SOCKOPT_IP_TOS:
+		result = setsockopt(socket, IPPROTO_IP, IP_TOS, (char*)&value, sizeof(int));
+
+		break;
+
+	case ENET_SOCKOPT_IP_TOS_IPV6:
+		result = setsockopt(socket, IPPROTO_IPV6, IPV6_TCLASS, (char*)&value, sizeof(int));
+
+		break;
+
 	default:
 		break;
 	}
@@ -4937,6 +4961,16 @@ int enet_socket_set_option(ENetSocket socket, ENetSocketOption option, int value
 
 	case ENET_SOCKOPT_IPV6_V6ONLY:
 		result = setsockopt(socket, IPPROTO_IPV6, IPV6_V6ONLY, (char*)&value, sizeof(int));
+
+		break;
+
+	case ENET_SOCKOPT_IP_TOS:
+		result = setsockopt(socket, IPPROTO_IP, IP_TOS, (char*)&value, sizeof(int));
+
+		break;
+
+	case ENET_SOCKOPT_IP_TOS_IPV6:
+		result = setsockopt(socket, IPPROTO_IPV6, IPV6_TCLASS, (char*)&value, sizeof(int));
 
 		break;
 
