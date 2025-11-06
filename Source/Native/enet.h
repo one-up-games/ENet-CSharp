@@ -425,7 +425,8 @@ extern "C" {
 		ENET_SOCKOPT_SNDTIMEO = 7,
 		ENET_SOCKOPT_ERROR = 8,
 		ENET_SOCKOPT_NODELAY = 9,
-		ENET_SOCKOPT_IPV6_V6ONLY = 10
+		ENET_SOCKOPT_IPV6_V6ONLY = 10,
+		ENET_SOCKOPT_IP_TOS = 11
 	} ENetSocketOption;
 
 	typedef enum _ENetSocketShutdown {
@@ -4602,6 +4603,11 @@ int enet_socket_set_option(ENetSocket socket, ENetSocketOption option, int value
 
 		break;
 
+	case ENET_SOCKOPT_IP_TOS:
+		result = setsockopt(socket, IPPROTO_IP, IP_TOS, (char*)&value, sizeof(int));
+
+		break;
+
 	default:
 		break;
 	}
@@ -4937,6 +4943,11 @@ int enet_socket_set_option(ENetSocket socket, ENetSocketOption option, int value
 
 	case ENET_SOCKOPT_IPV6_V6ONLY:
 		result = setsockopt(socket, IPPROTO_IPV6, IPV6_V6ONLY, (char*)&value, sizeof(int));
+
+		break;
+
+	case ENET_SOCKOPT_IP_TOS:
+		result = setsockopt(socket, IPPROTO_IP, IP_TOS, (char*)&value, sizeof(int));
 
 		break;
 
