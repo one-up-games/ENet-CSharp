@@ -1,0 +1,3 @@
+/home/runner/work/ENet-CSharp/ENet-CSharp/_codeql_build_dir/CMakeFiles/enet.dir
+/home/runner/work/ENet-CSharp/ENet-CSharp/_codeql_build_dir/CMakeFiles/edit_cache.dir
+/home/runner/work/ENet-CSharp/ENet-CSharp/_codeql_build_dir/CMakeFiles/rebuild_cache.dir
