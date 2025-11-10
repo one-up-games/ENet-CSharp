@@ -1430,12 +1430,10 @@ namespace ENet
 
 		[DllImport(nativeLibrary, CallingConvention = CallingConvention.Cdecl)]
 		internal static extern void enet_peer_reset(IntPtr peer);
-	}
-
 
 #if UNITY_EDITOR
 
         public static string nativeLibraryName { get { return nativeLibrary; } }
-
 #endif
+	}
 }
