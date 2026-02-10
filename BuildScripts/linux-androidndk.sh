@@ -41,7 +41,6 @@ if [ ! -d "$DUMP/android-ndk-r28c" ]; then
         fi
 fi
 
-PATH="$DUMP/android-ndk-r28c:$PATH"
 NDK_ROOT="$DUMP/android-ndk-r28c"
 cd $SOURCEDIR
 
