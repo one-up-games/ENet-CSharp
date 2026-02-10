@@ -42,6 +42,7 @@ if [ ! -d "$DUMP/android-ndk-r28c" ]; then
 fi
 
 PATH="$DUMP/android-ndk-r28c:$PATH"
+NDK_ROOT="$DUMP/android-ndk-r28c"
 cd $SOURCEDIR
 
 echo "Output directory is set to '$OUTPUTDIR'."
@@ -49,13 +50,13 @@ echo "Compile: ENet Native (Non-debug version)"
 if [ ! -d "$OUTPUTDIR/Release" ]; then
         mkdir -p "$OUTPUTDIR/Release"
 fi
-NDK_LIBS_OUT="$OUTPUTDIR/Release" ndk-build
+NDK_LIBS_OUT="$OUTPUTDIR/Release" "$NDK_ROOT/ndk-build"
 
 echo "Compile: ENet Native (Debug version)"
 if [ ! -d "$OUTPUTDIR/Debug" ]; then
         mkdir -p "$OUTPUTDIR/Debug"
 fi
-NDK_LIBS_OUT="$OUTPUTDIR/Debug" ENET_DEBUG=1 ndk-build
+NDK_LIBS_OUT="$OUTPUTDIR/Debug" ENET_DEBUG=1 "$NDK_ROOT/ndk-build"
 
 echo ""
 echo "Complete!"
