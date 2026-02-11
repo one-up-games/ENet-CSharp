@@ -20,8 +20,8 @@ if [ ! -d $DUMP ]; then
         mkdir $DUMP
 fi
 
-if [ ! -f "$DUMP/android-ndk-r25c-linux.zip" ]; then
-        wget https://dl.google.com/android/repository/android-ndk-r25c-linux.zip -O "$DUMP/android-ndk-r25c-linux.zip"
+if [ ! -f "$DUMP/android-ndk-r28c-linux.zip" ]; then
+        wget https://dl.google.com/android/repository/android-ndk-r28c-linux.zip -O "$DUMP/android-ndk-r28c-linux.zip"
 
         if [ $? -ne 0 ]; then
                 echo "Failure: Tools download failed. Aborting!"
@@ -31,9 +31,9 @@ fi
 
 cd "$DUMP"
 
-if [ ! -d "$DUMP/android-ndk-r25c" ]; then
+if [ ! -d "$DUMP/android-ndk-r28c" ]; then
         echo "Unpacking tools..."
-        unzip -o android-ndk-r25c-linux.zip
+        unzip -o android-ndk-r28c-linux.zip
 
         if [ $? -ne 0 ]; then
                 echo "Failure: Tools unpack failed. Aborting!"
@@ -41,7 +41,7 @@ if [ ! -d "$DUMP/android-ndk-r25c" ]; then
         fi
 fi
 
-PATH="$DUMP/android-ndk-r25c:$PATH"
+NDK_ROOT="$DUMP/android-ndk-r28c"
 cd $SOURCEDIR
 
 echo "Output directory is set to '$OUTPUTDIR'."
@@ -49,13 +49,13 @@ echo "Compile: ENet Native (Non-debug version)"
 if [ ! -d "$OUTPUTDIR/Release" ]; then
         mkdir -p "$OUTPUTDIR/Release"
 fi
-NDK_LIBS_OUT="$OUTPUTDIR/Release" ndk-build
+NDK_LIBS_OUT="$OUTPUTDIR/Release" "$NDK_ROOT/ndk-build"
 
 echo "Compile: ENet Native (Debug version)"
 if [ ! -d "$OUTPUTDIR/Debug" ]; then
         mkdir -p "$OUTPUTDIR/Debug"
 fi
-NDK_LIBS_OUT="$OUTPUTDIR/Debug" ENET_DEBUG=1 ndk-build
+NDK_LIBS_OUT="$OUTPUTDIR/Debug" ENET_DEBUG=1 "$NDK_ROOT/ndk-build"
 
 echo ""
 echo "Complete!"
